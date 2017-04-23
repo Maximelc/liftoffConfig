@@ -1,0 +1,50 @@
+source 'https://github.com/CocoaPods/Specs'
+
+platform :ios, '<%= deployment_target %>'
+use_frameworks!
+
+def common
+    pod 'PKHUD', '~> 4.0'
+    pod 'Alamofire', '~> 4.0'
+    pod 'AlamofireImage'
+    pod 'RxSwift'
+    pod 'RxCocoa'
+    pod 'SwiftyJSON'
+    pod 'SwiftyBeaver'
+    pod 'KeychainSwift'
+    pod 'SimpleAnimation', '~> 0.3'
+    pod 'IQKeyboardManager'
+end
+
+target '<%= project_name %>' do
+  common
+end
+
+abstract_target :unit_tests do
+  target '<%= test_target_name %>'
+  common
+end
+
+<% if enable_settings && dependency_manager_enabled?("cocoapods") %>
+# Copy acknowledgements to the Settings.bundle
+
+post_install do | installer |
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['SWIFT_VERSION'] = '3.1'
+      end
+    end
+  require 'fileutils'
+
+  pods_acknowledgements_path = 'Pods/Target Support Files/Pods-<%= project_name %>/Pods-<%= project_name %>-acknowledgements.plist'
+
+  puts 'pwd => ' + pods_acknowledgements_path
+  settings_bundle_path = Dir.glob("**/*Settings.bundle*").first
+
+  if File.file?(pods_acknowledgements_path)
+    puts 'Copying acknowledgements to Settings.bundle'
+    FileUtils.cp_r(pods_acknowledgements_path, "#{settings_bundle_path}/Acknowl\
+edgements.plist", :remove_destination => false)
+  end
+end
+<% end %>
